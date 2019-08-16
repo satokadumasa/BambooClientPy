@@ -1,0 +1,10 @@
+servers:
+  default:
+    server_name: www.hesper.site
+    port: 443
+    protcol: https
+    user_name: sato.kadumasa@gmail.com
+    password: glxre297
+    websocket_path: /cable
+    ws_port: 3000
+

@@ -2,12 +2,15 @@
 # -*- coding: utf8 -*-
 #import matplotlib
 #matplotlib.use('Agg')
-
+import os
 import sys
 import time
 from datetime import datetime
 import tkinter as Tkinter
 import threading
+from net.wsclient import WsClient
+# from net.cliet import Client
+import yaml
 # import tkinter as tk
 
 class MainWindow(Tkinter.Frame):
@@ -29,12 +32,22 @@ class MainWindow(Tkinter.Frame):
 
         self.thread_1 = threading.Thread(target=self.func1)
         self.thread_1.start()
+        with open('config/server_info.yaml') as file:
+            self.server_info = yaml.load(file, Loader=yaml.SafeLoader)
+            print(self.server_info)
+
+#         self.server_info =
 
     def create_widgets(self):
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
         self.stop_app_btn["command"] = self.stop_app
         self.stop_app_btn.pack(side="top")
+
+        self.connect_to_server_btn = Tkinter.Button(self.master)
+        self.connect_to_server_btn["text"] = "CONNECT"
+        self.connect_to_server_btn["command"] = self.start_connect
+        self.connect_to_server_btn.pack(side="top")
 
         self.label1 = Tkinter.Label(self.master, textvariable=self.now_time, width=20)
         self.label1.pack()
@@ -49,6 +62,21 @@ class MainWindow(Tkinter.Frame):
             thread.join()
             print("All thread is ended.")
 
+    def start_connect(self):
+        print("start_connect")
+        self.thread_2 = threading.Thread(target=self.connect_to_server)
+        self.thread_2.start()
+
+    def connect_to_server(self):
+        print("connect_to_server")
+        print(self.server_info)
+        print("---------------")
+        cl = WsClient(self.server_info)
+        print("connect_to_server CH-01")
+        cl.auth_user()
+#         cl.connect_websocket()
+        print("connect_to_server CH-02")
+
     def func1(self):
         now_time = Tkinter.StringVar()
         while True:
@@ -58,6 +86,7 @@ class MainWindow(Tkinter.Frame):
             time.sleep(1)
 
 if __name__ == "__main__":
+    os.chdir('../')
     root = Tkinter.Tk()
     mw = MainWindow(master = root)
     mw.run()
