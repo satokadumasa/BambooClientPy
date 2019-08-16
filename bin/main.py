@@ -31,8 +31,6 @@ class MainWindow(Tkinter.Frame):
         self.thread_1.start()
 
     def create_widgets(self):
-#         self.stop_app_btn = Tkinter.Button( self.master,  text=u"QUIT",  command=self.stop_app)
-#         self.stop_app_btn.pack(side="bottom")
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
         self.stop_app_btn["command"] = self.stop_app
