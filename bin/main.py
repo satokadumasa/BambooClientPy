@@ -49,6 +49,11 @@ class MainWindow(Tkinter.Frame):
         self.connect_to_server_btn["command"] = self.start_connect
         self.connect_to_server_btn.pack(side="top")
 
+        self.start_chat_btn = Tkinter.Button(self.master)
+        self.start_chat_btn["text"] = "CONNECT CHAT"
+        self.start_chat_btn["command"] = self.start_chat
+        self.start_chat_btn.pack(side="top")
+
         self.label1 = Tkinter.Label(self.master, textvariable=self.now_time, width=20)
         self.label1.pack()
 
@@ -71,11 +76,14 @@ class MainWindow(Tkinter.Frame):
         print("connect_to_server")
         print(self.server_info)
         print("---------------")
-        cl = WsClient(self.server_info)
-        print("connect_to_server CH-01")
-        cl.auth_user()
+        self.cl = WsClient(self.server_info)
+        print("---------------")
+        self.cl.auth_user()
+        print("---------------")
 #         cl.connect_websocket()
-        print("connect_to_server CH-02")
+
+    def start_chat(self):
+        self.cl.start_chat()
 
     def func1(self):
         now_time = Tkinter.StringVar()

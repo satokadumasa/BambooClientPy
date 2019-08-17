@@ -12,45 +12,49 @@ import requests
 # import sys
 
 class WsClient:
+    # 初期化
     def __init__(self, server_info):
-#             host = "ws://www.hesper.site:3000/"
         print("WsClient.init")
-#         print(server_info)
+        # 接続先情報受け取り
         self.server_info = server_info
+        print("-------------------")
+        print(self.server_info)
+        print("-------------------")
+        # 通常ソケットの生成
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # セッション生成
         self.session = requests.session()
-#         print("WsClient.init CH-01")
-#         print("WsClient.init server_name" + self.server_info['servers']['default']['server_name'] + "/cable")
-#         print("WsClient.init ws_port" + str(self.server_info['servers']['default']['port']))
-        self.host = "ws://" + self.server_info['servers']['default']['server_name'] + ":" + str(self.server_info['servers']['default']['ws_port']) + "/cable"
-#         print("WsClient.init host:" + self.host)
-        self.ws = websocket.WebSocketApp(self.host,
+
+    def start_chat(self):
+        # Websocket用意
+        ws_url = "ws://" + self.server_info['servers']['default']['server_name'] + ":" + str(self.server_info['servers']['default']['ws_port']) +  self.server_info['servers']['default']['websocket_path']
+        self.ws = websocket.WebSocketApp(ws_url,
                                     on_message=self.on_message,
                                     on_error=self.on_error,
                                     on_close=self.on_close)
-#         print("WsClient.init on_open:")
+        # 通信ポーリング
         self.ws.on_open = self.on_open
-#         print("WsClient.init run_forever:")
         self.ws.run_forever()
 
+    # メッセージ受信
     def on_message(self, message):
         print("on_message")
         print(self.ws)
         print(message)
 
-
+    # エラーハンドリング
     def on_error(self, error):
         print("on_error")
         print(self.ws)
         print(error)
 
-
+    # Websocketのクローズ
     def on_close(self):
         print("on_close")
         print(self.ws)
         print("### closed ###")
 
-
+    # 通信ポーリング
     def on_open(self):
         print("###on_open###")
         def run():
@@ -76,7 +80,8 @@ class WsClient:
     # 認証処理
     def auth_user(self):
         print("Client.auth_user ")
-        url = 'https://www.hesper.site/users/sign_in'
+        url = self.server_info['servers']['default']['protcol'] + '://' + self.server_info['servers']['default']['server_name'] + self.server_info['servers']['default']['sign_in_url']
+        print('sign_in_url > ' + url)
         response = self.session.get(url)
 
         # BeautifulSoupオブジェクト作成(token取得の為)
@@ -84,8 +89,8 @@ class WsClient:
 
         login_data = {
            'UTF-8': '✓',
-           'session[email]': 'sato.kadumasa@gmail.com',
-           'session[password]': 'glxre297',
+           'email': self.server_info['servers']['default']['user_name'],
+           'password': self.server_info['servers']['default']['password'],
         }
 
         # tokenの取得
@@ -94,6 +99,11 @@ class WsClient:
         # 取得したtokenをpostするパラメータに追加
         login_data['authenticity_token'] = authenticity_token
 
+        # ログインAPI実行
+        url = self.server_info['servers']['default']['protcol'] + '://' + self.server_info['servers']['default']['server_name'] + self.server_info['servers']['default']['api_sign_in_url']
+        print('api_sign_in_url > '   + url)
+
+        # 実行結果
         login_data = self.session.post(url, data=login_data)
         time.sleep(2)
         print(login_data.text)
