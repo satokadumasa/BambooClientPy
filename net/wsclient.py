@@ -38,44 +38,44 @@ class WsClient:
 
     # メッセージ受信
     def on_message(self, message):
-        print("on_message")
+        print("WsClient.on_message")
         print(self.ws)
         print(message)
 
     # エラーハンドリング
     def on_error(self, error):
-        print("on_error")
+        print("WsClient.on_error")
         print(self.ws)
         print(error)
 
     # Websocketのクローズ
     def on_close(self):
-        print("on_close")
+        print("WsClient.on_close")
         print(self.ws)
         print("### closed ###")
 
     # 通信ポーリング
     def on_open(self):
-        print("###on_open###")
-        def run():
-            print("###run###")
-            print("run")
-            print(self.ws)
-            for i in range(3):
-                # send the message, then wait
-                # so thread doesn't exit and socket
-                # isn't closed
-                print("ws send...")
-                self.ws.send("Hello %d" % i)
-                print("time sleep...")
-                time.sleep(1)
-
-            time.sleep(1)
-            self.ws.close()
-            print("Thread terminating...")
-
+        print("WsClient.on_open")
         print("Thread call run")
-        Thread(target=run).start()
+        Thread(target=self.run).start()
+    def run(self):
+        print("WsClient.run")
+        print(self.ws)
+        for i in range(30):
+            # send the message, then wait
+            # so thread doesn't exit and socket
+            # isn't closed
+            print("ws send...")
+            self.ws.send("Hello %d" % i)
+            print("Hello %d" % i)
+            print("time sleep...")
+            time.sleep(1)
+
+        time.sleep(1)
+        self.ws.close()
+        print("Thread terminating...")
+
 
     # 認証処理
     def auth_user(self):
@@ -107,4 +107,3 @@ class WsClient:
         login_data = self.session.post(url, data=login_data)
         time.sleep(2)
         print(login_data.text)
-

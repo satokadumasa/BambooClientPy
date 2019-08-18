@@ -1,7 +1,3 @@
-#!/Users/k_sato/.pyenv/shims/python
-# -*- coding: utf8 -*-
-#import matplotlib
-#matplotlib.use('Agg')
 import os
 import sys
 import time
@@ -42,17 +38,17 @@ class MainWindow(Tkinter.Frame):
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
         self.stop_app_btn["command"] = self.stop_app
-        self.stop_app_btn.pack(side="top")
+        self.stop_app_btn.place(x=20,y=20,width=120,height=20)
 
         self.connect_to_server_btn = Tkinter.Button(self.master)
         self.connect_to_server_btn["text"] = "CONNECT"
         self.connect_to_server_btn["command"] = self.start_connect
-        self.connect_to_server_btn.pack(side="top")
+        self.connect_to_server_btn.place(x=20,y=40,width=120,height=20)
 
         self.start_chat_btn = Tkinter.Button(self.master)
         self.start_chat_btn["text"] = "CONNECT CHAT"
         self.start_chat_btn["command"] = self.start_chat
-        self.start_chat_btn.pack(side="top")
+        self.start_chat_btn.place(x=20,y=60,width=120,height=20)
 
         self.label1 = Tkinter.Label(self.master, textvariable=self.now_time, width=20)
         self.label1.pack()
