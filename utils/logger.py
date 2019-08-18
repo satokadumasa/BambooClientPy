@@ -8,3 +8,4 @@ class Logger:
         f = open('tmp/log/debig.log','w')
         f.write('hoge\n')
         f.close()
+        

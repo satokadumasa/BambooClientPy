@@ -1,4 +1,4 @@
-import os
+# import os
 # import sys
 import time
 from datetime import datetime
@@ -26,14 +26,19 @@ class MainWindow(Tkinter.Frame):
 
         self.create_widgets()
 
-        self.thread_1 = threading.Thread(target=self.func1)
-        self.thread_1.start()
-        with open('config/server_info.yaml') as file:
-            self.server_info = yaml.load(file, Loader=yaml.SafeLoader)
-            print(self.server_info)
+        self.read_configs()
 
-#         self.server_info =
+        #時計
+        self.tclock_hread = threading.Thread(target=self.clock_start)
+        self.tclock_hread.start()
 
+        #契約済みサーバへの接続
+        self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
+        self.connect_to_server_thread.start()
+
+    """
+    画面生成
+    """
     def create_widgets(self):
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
@@ -57,44 +62,51 @@ class MainWindow(Tkinter.Frame):
         self.label1["anchor"] = "w"
         self.label1.place(x=20,y=20,width=300,height=20)
 
+    """
+    """
     def run(self):
         self.master.mainloop()
+
+    """
+    設定ファイル読み込み
+    """
+    def read_configs(self):
+        with open('config/server_info.yaml') as file:
+            self.server_info = yaml.load(file, Loader=yaml.SafeLoader)
+            print(self.server_info)
 
     def stop_app(self):
         thread_list = threading.enumerate()
         thread_list.remove(threading.main_thread())
         for thread in thread_list:
-            thread.join()
+            thread.alive = False
+#             thread.join()
             print("All thread is ended.")
 
     def start_connect(self):
         print("start_connect")
-        self.thread_2 = threading.Thread(target=self.connect_to_server)
-        self.thread_2.start()
+        self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
+        self.connect_to_server_thread.start()
 
     def connect_to_server(self):
         print("connect_to_server")
         print(self.server_info)
-        print("---------------")
         self.cl = WsClient(self.server_info)
-        print("---------------")
         self.cl.auth_user()
         print("---------------")
-#         cl.connect_websocket()
 
     def start_chat(self):
         self.cl.start_chat()
 
-    def func1(self):
+    def clock_start(self):
         now_time = Tkinter.StringVar()
         while True:
             now_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-            print("now_time:" + now_time)
             self.now_time.set(now_time)
             time.sleep(1)
 
 if __name__ == "__main__":
-    os.chdir('../')
+#     os.chdir('../')
     root = Tkinter.Tk()
     mw = MainWindow(master = root)
     mw.run()
