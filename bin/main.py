@@ -1,5 +1,5 @@
 import os
-import sys
+# import sys
 import time
 from datetime import datetime
 import tkinter as Tkinter
@@ -37,24 +37,28 @@ class MainWindow(Tkinter.Frame):
     def create_widgets(self):
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
+        self.stop_app_btn["anchor"] = "w"
         self.stop_app_btn["command"] = self.stop_app
-        self.stop_app_btn.place(x=20,y=20,width=120,height=20)
+        self.stop_app_btn.place(x=20,y=40,width=120,height=20)
 
         self.connect_to_server_btn = Tkinter.Button(self.master)
         self.connect_to_server_btn["text"] = "CONNECT"
+        self.connect_to_server_btn["anchor"] = "w"
         self.connect_to_server_btn["command"] = self.start_connect
-        self.connect_to_server_btn.place(x=20,y=40,width=120,height=20)
+        self.connect_to_server_btn.place(x=20,y=60,width=120,height=20)
 
         self.start_chat_btn = Tkinter.Button(self.master)
         self.start_chat_btn["text"] = "CONNECT CHAT"
+        self.start_chat_btn["anchor"] = "w"
         self.start_chat_btn["command"] = self.start_chat
-        self.start_chat_btn.place(x=20,y=60,width=120,height=20)
+        self.start_chat_btn.place(x=20,y=80,width=120,height=20)
 
         self.label1 = Tkinter.Label(self.master, textvariable=self.now_time, width=20)
-        self.label1.pack()
+        self.label1["anchor"] = "w"
+        self.label1.place(x=20,y=20,width=300,height=20)
 
     def run(self):
-       self.master.mainloop()
+        self.master.mainloop()
 
     def stop_app(self):
         thread_list = threading.enumerate()
