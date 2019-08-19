@@ -7,10 +7,13 @@ import threading
 from net.wsclient import WsClient
 # from net.cliet import Client
 import yaml
+from utils.logger import Logger
 # import tkinter as tk
 
 class MainWindow(Tkinter.Frame):
     def __init__(self, master=None):
+        self.logger = Logger()
+        self.logger.log(['MainWindow', 'init', 'START'])
         super().__init__(master)
         self.master = master
         self.master.grid()
@@ -40,6 +43,7 @@ class MainWindow(Tkinter.Frame):
     画面生成
     """
     def create_widgets(self):
+        self.logger.log(['MainWindow', 'create_widgets', 'START'])
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
         self.stop_app_btn["anchor"] = "w"
@@ -65,17 +69,20 @@ class MainWindow(Tkinter.Frame):
     """
     """
     def run(self):
+        self.logger.log(['MainWindow', 'run', 'START'])
         self.master.mainloop()
 
     """
     設定ファイル読み込み
     """
     def read_configs(self):
+        self.logger.log(['MainWindow', 'read_configs', 'START'])
         with open('config/server_info.yaml') as file:
             self.server_info = yaml.load(file, Loader=yaml.SafeLoader)
             print(self.server_info)
 
     def stop_app(self):
+        self.logger.log(['MainWindow', 'stop_app', 'START'])
         thread_list = threading.enumerate()
         thread_list.remove(threading.main_thread())
         for thread in thread_list:
@@ -84,16 +91,24 @@ class MainWindow(Tkinter.Frame):
             print("All thread is ended.")
 
     def start_connect(self):
+        self.logger.log(['MainWindow', 'start_connect', 'START'])
         print("start_connect")
         self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
         self.connect_to_server_thread.start()
 
     def connect_to_server(self):
-        print("connect_to_server")
+        self.logger.log(['MainWindow', 'connect_to_server', 'START'])
         print(self.server_info)
-        self.cl = WsClient(self.server_info)
-        self.cl.auth_user()
-        print("---------------")
+        print('------------')
+        self.cls = []
+        for server_name, server_info in self.server_info['servers'].items():
+            self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_info['server_name']])
+            cl = WsClient(server_info)
+            cl.auth_user()
+            self.cls.append(cl)
+            self.logger.log(['MainWindow', 'connect_to_server', '------------'])
+        print(self.cls)
+        self.logger.log(['MainWindow', 'connect_to_server', '------------'])
 
     def start_chat(self):
         self.cl.start_chat()
@@ -106,7 +121,6 @@ class MainWindow(Tkinter.Frame):
             time.sleep(1)
 
 if __name__ == "__main__":
-#     os.chdir('../')
     root = Tkinter.Tk()
     mw = MainWindow(master = root)
     mw.run()

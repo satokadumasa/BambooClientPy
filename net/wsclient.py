@@ -9,11 +9,14 @@ from bs4 import BeautifulSoup
 from threading import Thread
 import time
 import requests
+from utils.logger import Logger
 # import sys
 
 class WsClient:
     # 初期化
     def __init__(self, server_info):
+        self.logger = Logger()
+        self.logger.log(['WsClient', 'init', 'START'])
         print("WsClient.init")
         # 接続先情報受け取り
         self.server_info = server_info
@@ -26,8 +29,9 @@ class WsClient:
         self.session = requests.session()
 
     def start_chat(self):
+        self.logger.log(['WsClient', 'start_chat', 'START'])
         # Websocket用意
-        ws_url = "ws://" + self.server_info['servers']['default']['server_name'] + ":" + str(self.server_info['servers']['default']['ws_port']) +  self.server_info['servers']['default']['websocket_path']
+        ws_url = "ws://" + self.server_info['server_name'] + ":" + str(self.server_info['ws_port']) +  self.server_info['websocket_path']
         self.ws = websocket.WebSocketApp(ws_url,
                                     on_message=self.on_message,
                                     on_error=self.on_error,
@@ -38,12 +42,13 @@ class WsClient:
 
     # メッセージ受信
     def on_message(self, message):
-        print("WsClient.on_message")
+        self.logger.log(['WsClient', 'on_message', 'START'])
         print(self.ws)
         print(message)
 
     # エラーハンドリング
     def on_error(self, error):
+        self.logger.log(['WsClient', 'on_error', 'START'])
         print("WsClient.on_error")
         print(self.ws)
         print(error)
@@ -56,10 +61,11 @@ class WsClient:
 
     # 通信ポーリング
     def on_open(self):
-        print("WsClient.on_open")
+        self.logger.log(['WsClient', 'on_open', 'START'])
         print("Thread call run")
         Thread(target=self.run).start()
     def run(self):
+        self.logger.log(['WsClient', 'run', 'START'])
         print("WsClient.run")
         print(self.ws)
         for i in range(30):
@@ -80,30 +86,33 @@ class WsClient:
     # 認証処理
     def auth_user(self):
         print("Client.auth_user ")
-        url = self.server_info['servers']['default']['protcol'] + '://' + self.server_info['servers']['default']['server_name'] + self.server_info['servers']['default']['sign_in_url']
+        url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['sign_in_url']
         print('sign_in_url > ' + url)
-        response = self.session.get(url)
+        try:
+            response = self.session.get(url)
+            print("status_code: " +str(response.status_code))
+            # BeautifulSoupオブジェクト作成(token取得の為)
+            bs = BeautifulSoup(response.text, 'html.parser')
+            login_data = {
+               'UTF-8': '✓',
+               'email': self.server_info['user_name'],
+               'password': self.server_info['password'],
+            }
 
-        # BeautifulSoupオブジェクト作成(token取得の為)
-        bs = BeautifulSoup(response.text, 'html.parser')
+            # tokenの取得
+            authenticity_token = bs.find(attrs={'name':'authenticity_token'}).get('value')
 
-        login_data = {
-           'UTF-8': '✓',
-           'email': self.server_info['servers']['default']['user_name'],
-           'password': self.server_info['servers']['default']['password'],
-        }
+            # 取得したtokenをpostするパラメータに追加
+            login_data['authenticity_token'] = authenticity_token
 
-        # tokenの取得
-        authenticity_token = bs.find(attrs={'name':'authenticity_token'}).get('value')
+            # ログインAPI実行
+            url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['api_sign_in_url']
+            print('api_sign_in_url > '   + url)
 
-        # 取得したtokenをpostするパラメータに追加
-        login_data['authenticity_token'] = authenticity_token
-
-        # ログインAPI実行
-        url = self.server_info['servers']['default']['protcol'] + '://' + self.server_info['servers']['default']['server_name'] + self.server_info['servers']['default']['api_sign_in_url']
-        print('api_sign_in_url > '   + url)
-
-        # 実行結果
-        login_data = self.session.post(url, data=login_data)
-        time.sleep(2)
-        print(login_data.text)
+            # 実行結果
+            login_data = self.session.post(url, data=login_data)
+            time.sleep(2)
+            self.status = 'able'
+            print(login_data.text)
+        except requests.exceptions.RequestException:
+            self.status = 'able'
