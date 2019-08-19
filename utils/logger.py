@@ -8,7 +8,8 @@ from datetime import datetime
 class Logger:
     """
     Initialize Logger class
-    param none
+    @param none
+    @return:  none
     """
     def __init__(self):
         today = datetime.now().strftime("%Y%m%d")
@@ -16,7 +17,8 @@ class Logger:
 
     """
     Log out put
-    param @messages list
+    @param messages list
+    @return:  none
     """
     def log(self, messages):
         fp = open(self.log_file_name,'a')

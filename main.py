@@ -1,5 +1,6 @@
-# import os
+import os
 # import sys
+import glob
 import time
 from datetime import datetime
 import tkinter as Tkinter
@@ -11,6 +12,11 @@ from utils.logger import Logger
 # import tkinter as tk
 
 class MainWindow(Tkinter.Frame):
+    """
+    MainWindow初期化
+    @param master
+    @return: none
+    """
     def __init__(self, master=None):
         self.logger = Logger()
         self.logger.log(['MainWindow', 'init', 'START'])
@@ -41,6 +47,8 @@ class MainWindow(Tkinter.Frame):
 
     """
     画面生成
+    @param none
+    @return: none
     """
     def create_widgets(self):
         self.logger.log(['MainWindow', 'create_widgets', 'START'])
@@ -67,6 +75,9 @@ class MainWindow(Tkinter.Frame):
         self.label1.place(x=20,y=20,width=300,height=20)
 
     """
+    主処理
+    @param none
+    @return: none
     """
     def run(self):
         self.logger.log(['MainWindow', 'run', 'START'])
@@ -74,32 +85,46 @@ class MainWindow(Tkinter.Frame):
 
     """
     設定ファイル読み込み
+    @param none
+    @return: none
     """
     def read_configs(self):
         self.logger.log(['MainWindow', 'read_configs', 'START'])
-        with open('config/server_info.yaml') as file:
-            self.server_info = yaml.load(file, Loader=yaml.SafeLoader)
-            print(self.server_info)
+        files = glob.glob("config/*")
+        print(files)
+        for file in files:
+            self.logger.log(['MainWindow', 'read_configs', 'file:' + file])
+            name, ext = os.path.splitext(file)
+            self.logger.log(['MainWindow', 'read_configs', 'name:' + name, 'ext:' + ext])
+            if ext != '.yaml':
+                continue
+            config_name = name.split('/')[-1]
+            self.logger.log(['MainWindow', 'read_configs', 'config_name:' + config_name])
+            with open(file) as file:
+                conf = yaml.load(file, Loader=yaml.SafeLoader)
+                exec('self.{} = {}'.format(config_name, conf))
+        print(self.server_info)
 
-    def stop_app(self):
-        self.logger.log(['MainWindow', 'stop_app', 'START'])
-        thread_list = threading.enumerate()
-        thread_list.remove(threading.main_thread())
-        for thread in thread_list:
-            thread.alive = False
-#             thread.join()
-            print("All thread is ended.")
 
+    """
+    サーバー接続呼び出し
+    @param none
+    @return: none
+    """
     def start_connect(self):
         self.logger.log(['MainWindow', 'start_connect', 'START'])
-        print("start_connect")
         self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
         self.connect_to_server_thread.start()
 
+    """
+    サーバー接続
+    @param none
+    @return: none
+    """
     def connect_to_server(self):
         self.logger.log(['MainWindow', 'connect_to_server', 'START'])
         print(self.server_info)
-        print('------------')
+        self.logger.log(['MainWindow', 'connect_to_server', '------------'])
         self.cls = []
         for server_name, server_info in self.server_info['servers'].items():
             self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_info['server_name']])
@@ -110,15 +135,39 @@ class MainWindow(Tkinter.Frame):
         print(self.cls)
         self.logger.log(['MainWindow', 'connect_to_server', '------------'])
 
+    """
+    チャットルーム接続
+    @param none
+    @return: none
+    """
     def start_chat(self):
         self.cl.start_chat()
 
+    """
+    時計開始
+    @param none
+    @return: none
+    """
     def clock_start(self):
         now_time = Tkinter.StringVar()
         while True:
             now_time = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
             self.now_time.set(now_time)
             time.sleep(1)
+
+    """
+    システム終了
+    @param none
+    @return: none
+    """
+    def stop_app(self):
+        self.logger.log(['MainWindow', 'stop_app', 'START'])
+        thread_list = threading.enumerate()
+        thread_list.remove(threading.main_thread())
+        for thread in thread_list:
+            thread.alive = False
+#             thread.join()
+            print("All thread is ended.")
 
 if __name__ == "__main__":
     root = Tkinter.Tk()

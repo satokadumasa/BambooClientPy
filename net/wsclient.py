@@ -46,24 +46,42 @@ class WsClient:
         print(self.ws)
         print(message)
 
-    # エラーハンドリング
+    """
+    エラーハンドリング
+    @param error
+    @return:  none
+    """
     def on_error(self, error):
         self.logger.log(['WsClient', 'on_error', 'START'])
         print("WsClient.on_error")
         print(self.ws)
         print(error)
 
-    # Websocketのクローズ
+    """
+    Websocketのクローズ
+    @param none
+    @return:  none
+    """
     def on_close(self):
         print("WsClient.on_close")
         print(self.ws)
         print("### closed ###")
 
-    # 通信ポーリング
+    """
+    通信ポーリング
+    @param none
+    @return:  none
+    """
     def on_open(self):
         self.logger.log(['WsClient', 'on_open', 'START'])
         print("Thread call run")
         Thread(target=self.run).start()
+
+    """
+    クライアント
+    @param none
+    @return:  none
+    """
     def run(self):
         self.logger.log(['WsClient', 'run', 'START'])
         print("WsClient.run")
@@ -82,8 +100,11 @@ class WsClient:
         self.ws.close()
         print("Thread terminating...")
 
-
-    # 認証処理
+    """
+    認証処理
+    @param none
+    @return:  none
+    """
     def auth_user(self):
         print("Client.auth_user ")
         url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['sign_in_url']
