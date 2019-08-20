@@ -29,6 +29,7 @@ class WsClient:
         self.session = requests.session()
 
     def start_chat(self):
+        print("WsClient.start_chat")
         self.logger.log(['WsClient', 'start_chat', 'START'])
         # Websocket用意
         ws_url = "ws://" + self.server_info['server_name'] + ":" + str(self.server_info['ws_port']) +  self.server_info['websocket_path']

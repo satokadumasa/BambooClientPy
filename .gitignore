@@ -1,2 +1,4 @@
 /bin/.venv/*
 /config/server_info.yaml
+/tmp/*
+/tmp/log/*

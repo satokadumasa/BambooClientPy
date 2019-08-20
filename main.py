@@ -9,6 +9,7 @@ from net.wsclient import WsClient
 # from net.cliet import Client
 import yaml
 from utils.logger import Logger
+from tkinter import Listbox
 # import tkinter as tk
 
 class MainWindow(Tkinter.Frame):
@@ -33,9 +34,9 @@ class MainWindow(Tkinter.Frame):
         self.now_time = Tkinter.StringVar()
         self.now_time.set('hello')
 
-        self.create_widgets()
-
         self.read_configs()
+
+        self.create_widgets()
 
         #時計
         self.tclock_hread = threading.Thread(target=self.clock_start)
@@ -74,6 +75,16 @@ class MainWindow(Tkinter.Frame):
         self.label1["anchor"] = "w"
         self.label1.place(x=20,y=20,width=300,height=20)
 
+        print(self.server_info)
+
+        idx = 0
+        self.server_list = Listbox(self.master, height=10)
+        for server_name, server_info in self.server_info['servers'].items():
+            self.server_list.insert(idx, self.creat_connect_btn(server_info))
+            idx = idx + 1
+        self.server_list.place(x=20,y=100,width=300)
+
+
     """
     主処理
     @param none
@@ -90,7 +101,7 @@ class MainWindow(Tkinter.Frame):
     """
     def read_configs(self):
         self.logger.log(['MainWindow', 'read_configs', 'START'])
-        files = glob.glob("config/*")
+        files = glob.glob("config/**/*",  recursive=True)
         print(files)
         for file in files:
             self.logger.log(['MainWindow', 'read_configs', 'file:' + file])
@@ -104,7 +115,6 @@ class MainWindow(Tkinter.Frame):
                 conf = yaml.load(file, Loader=yaml.SafeLoader)
                 exec('self.{} = {}'.format(config_name, conf))
         print(self.server_info)
-
 
     """
     サーバー接続呼び出し
@@ -168,6 +178,20 @@ class MainWindow(Tkinter.Frame):
             thread.alive = False
 #             thread.join()
             print("All thread is ended.")
+
+    def creat_connect_btn(self, server_info):
+        print("server_name:" + server_info['server_name'])
+        print(server_info)
+        print('-----------------------')
+        self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_info['server_name']])
+        cl = WsClient(server_info)
+        connect_to_server_btn = Tkinter.Button(self.master)
+        connect_to_server_btn["text"] = server_info['server_name']
+        connect_to_server_btn["anchor"] = "w"
+        connect_to_server_btn["command"] = cl.start_chat()
+#         connect_to_server_btn.place(x=20,y=by,width=120,height=20)
+        return connect_to_server_btn
+
 
 if __name__ == "__main__":
     root = Tkinter.Tk()
