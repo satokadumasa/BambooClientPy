@@ -1,5 +1,9 @@
+import PIL
 import os
 # import sys
+import matplotlib
+from tkinter import Listbox
+matplotlib.use('tkagg')
 import yaml
 import glob
 import time
@@ -10,31 +14,34 @@ import tkinter.filedialog as tkmsg
 from net.wsclient import WsClient
 # from net.cliet import Client
 from utils.logger import Logger
+from webbrowser import BackgroundBrowser
 
-class MainWindow(Tkinter.Frame):
+# class MainWindow(Tkinter.Frame):
+class MainWindow:
     """
     MainWindow初期化
     @param master
     @return: none
     """
-    def __init__(self, master=None):
+#     def __init__(self, master=None):
+#         super().__init__(master)
+#         self.master = master
+    def __init__(self,):
         self.logger = Logger()
         self.logger.log(['MainWindow', 'init', 'START'])
-        super().__init__(master)
-        self.master = master
-        self.master.grid()
+        self.master = Tkinter.Tk()
         screen_width = self. master.winfo_screenwidth()
         screen_height = self. master.winfo_screenheight()
         self.master.title(u"Software Title")
         self.master.geometry('200x200+0+0')
-        self.master.minsize(400, screen_height)
+        self.master.minsize(500, screen_height)
         self.master.maxsize(screen_width,screen_height)
 
         self.now_time = Tkinter.StringVar()
         self.now_time.set('hello')
 
         self.read_configs()
-
+        self.connect_to_server()
         self.create_widgets()
 
         #時計
@@ -42,8 +49,8 @@ class MainWindow(Tkinter.Frame):
         self.tclock_hread.start()
 
         #契約済みサーバへの接続
-        self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
-        self.connect_to_server_thread.start()
+#         self.connect_to_server_thread = threading.Thread(target=self.connect_to_server)
+#         self.connect_to_server_thread.start()
 
     """
     画面生成
@@ -52,6 +59,26 @@ class MainWindow(Tkinter.Frame):
     """
     def create_widgets(self):
         self.logger.log(['MainWindow', 'create_widgets', 'START'])
+
+        # Canvas Widget を生成
+        # Canvas Widget をTopWidget上に配置
+        self.server_list_canvas = Tkinter.Canvas(self.master)
+        self.server_list_canvas["bg"] = "grey"
+        # 子Frameをanvas Widget上に配置
+        self.server_list_frame = Tkinter.Frame(self.server_list_canvas )
+        self.server_list_frame["bg"] = "blue"
+        # ScrollbarをCanvas上に配置
+        self.bar = Tkinter.Scrollbar(self.server_list_canvas)
+        self.bar["bg"] = "red"
+        # キャンバスをスクロールさせるように設定
+        self.server_list_canvas["yscrollcommand"] = self.bar.set
+        self.bar["command"]=self.server_list_canvas.yview # ScrollbarでCanvasを制御
+
+        # キャンバス、子フレーム、スクロールバーを表示
+        self.server_list_canvas.place(x=20,y=100 ,height=100, width=400)
+        self.server_list_frame.place(x=0,y=0 ,height=1000, width=350)
+        self.bar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
         self.stop_app_btn["anchor"] = "w"
@@ -73,6 +100,11 @@ class MainWindow(Tkinter.Frame):
         self.label1 = Tkinter.Label(self.master, textvariable=self.now_time, width=20)
         self.label1["anchor"] = "w"
         self.label1.place(x=20,y=20,width=300,height=20)
+
+        idx = 0
+        for server_name, server_info in self.server_info['servers'].items():
+            self.add_connect_btn(server_name, server_info, idx)
+            idx = idx + 1
 
         print(self.server_info)
 
@@ -139,11 +171,6 @@ class MainWindow(Tkinter.Frame):
         print('---------self cls end ------------')
         self.logger.log(['MainWindow', 'connect_to_server', '------------'])
 
-        idx = 0
-        for server_name, server_info in self.server_info['servers'].items():
-            self.add_connect_btn(server_name, server_info, idx)
-            idx = idx + 1
-
     """
     チャットルーム接続
     @param none
@@ -183,16 +210,17 @@ class MainWindow(Tkinter.Frame):
         print(server_info)
         self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_name])
         cl = WsClient(server_info)
-        by = 20 * idx + 100
+        by = 20 * idx # + 100
         cl = self.cls[server_name]
-        connect_to_server_btn = Tkinter.Button(self.master)
+        connect_to_server_btn = Tkinter.Button(self.server_list_frame)
         connect_to_server_btn["text"] = server_info['server_name']
         connect_to_server_btn["anchor"] = "w"
         connect_to_server_btn["command"] = cl.start_chat
-        connect_to_server_btn.place(x=20,y=by,width=120,height=20)
+        connect_to_server_btn.place(x=0,y=by,width=300,height=20)
 
 
 if __name__ == "__main__":
-    root = Tkinter.Tk()
-    mw = MainWindow(master = root)
+#     root = Tkinter.Tk()
+#     mw = MainWindow(master = root)
+    mw = MainWindow()
     mw.run()
