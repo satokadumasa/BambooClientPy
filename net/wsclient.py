@@ -87,7 +87,7 @@ class WsClient:
         self.logger.log(['WsClient', 'run', 'START'])
         print("WsClient.run")
         print(self.ws)
-        for i in range(30):
+        for i in range(3):
             # send the message, then wait
             # so thread doesn't exit and socket
             # isn't closed

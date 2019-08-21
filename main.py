@@ -1,16 +1,15 @@
 import os
 # import sys
+import yaml
 import glob
 import time
+import threading
 from datetime import datetime
 import tkinter as Tkinter
-import threading
+import tkinter.filedialog as tkmsg
 from net.wsclient import WsClient
 # from net.cliet import Client
-import yaml
 from utils.logger import Logger
-from tkinter import Listbox
-# import tkinter as tk
 
 class MainWindow(Tkinter.Frame):
     """
@@ -77,14 +76,6 @@ class MainWindow(Tkinter.Frame):
 
         print(self.server_info)
 
-        idx = 0
-        self.server_list = Listbox(self.master, height=10)
-        for server_name, server_info in self.server_info['servers'].items():
-            self.server_list.insert(idx, self.creat_connect_btn(server_info))
-            idx = idx + 1
-        self.server_list.place(x=20,y=100,width=300)
-
-
     """
     主処理
     @param none
@@ -135,15 +126,23 @@ class MainWindow(Tkinter.Frame):
         self.logger.log(['MainWindow', 'connect_to_server', 'START'])
         print(self.server_info)
         self.logger.log(['MainWindow', 'connect_to_server', '------------'])
-        self.cls = []
+        self.cls = {}
         for server_name, server_info in self.server_info['servers'].items():
             self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_info['server_name']])
             cl = WsClient(server_info)
             cl.auth_user()
-            self.cls.append(cl)
+#             self.cls.append(cl)
+            self.cls[server_name] = cl
             self.logger.log(['MainWindow', 'connect_to_server', '------------'])
+        print('---------self cls begin ------------')
         print(self.cls)
+        print('---------self cls end ------------')
         self.logger.log(['MainWindow', 'connect_to_server', '------------'])
+
+        idx = 0
+        for server_name, server_info in self.server_info['servers'].items():
+            self.add_connect_btn(server_name, server_info, idx)
+            idx = idx + 1
 
     """
     チャットルーム接続
@@ -179,18 +178,18 @@ class MainWindow(Tkinter.Frame):
 #             thread.join()
             print("All thread is ended.")
 
-    def creat_connect_btn(self, server_info):
-        print("server_name:" + server_info['server_name'])
+    def add_connect_btn(self, server_name, server_info, idx):
+        print(('MainWindow.add_connect_btn START'))
         print(server_info)
-        print('-----------------------')
-        self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_info['server_name']])
+        self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_name])
         cl = WsClient(server_info)
+        by = 20 * idx + 100
+        cl = self.cls[server_name]
         connect_to_server_btn = Tkinter.Button(self.master)
         connect_to_server_btn["text"] = server_info['server_name']
         connect_to_server_btn["anchor"] = "w"
-        connect_to_server_btn["command"] = cl.start_chat()
-#         connect_to_server_btn.place(x=20,y=by,width=120,height=20)
-        return connect_to_server_btn
+        connect_to_server_btn["command"] = cl.start_chat
+        connect_to_server_btn.place(x=20,y=by,width=120,height=20)
 
 
 if __name__ == "__main__":
