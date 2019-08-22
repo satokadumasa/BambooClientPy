@@ -60,6 +60,15 @@ class ListPanel:
         frame1=Tkinter.Frame(mainframe, bg='blue')
         frame1.pack(side='top', expand='yes',fill='x')
 
+        btn1 = Tkinter.Button(self.list_box)
+        btn1["text"] = "Btn1"
+        btn1.place(x=20, y=10, width=400, height=100)
+
+        btn2 = Tkinter.Button(self.list_box)
+        btn2["text"] = "Btn2"
+        btn2.place(x=20, y=30, width=400, height=100)
+
+
 #         add_fileicon=Tkinter.PhotoImage(file="../Icons/add_file.gif")
 #         add_directoryicon=Tkinter.PhotoImage(file="../Icons/add_directory.gif")
 #         list_file=[
@@ -159,4 +168,4 @@ if __name__ == "__main__":
     mw=ListPanel(root)
 #     mw = ListPanel()
     root.mainloop()
-#     mw.run()
+    mw.run()

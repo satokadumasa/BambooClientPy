@@ -3,6 +3,7 @@ import os
 # import sys
 import matplotlib
 from tkinter import Listbox
+from bin.chat_client import SocketClient
 matplotlib.use('tkagg')
 import yaml
 import glob
@@ -59,25 +60,40 @@ class MainWindow:
     """
     def create_widgets(self):
         self.logger.log(['MainWindow', 'create_widgets', 'START'])
+        # Server List 用Frameを生成
+        self.fr = Tkinter.Frame(self.master)
+        self.fr["bg"] = "yellow"
+        self.master.title("Toy")
+        self.master.geometry("+20+20")
 
         # Canvas Widget を生成
-        # Canvas Widget をTopWidget上に配置
-        self.server_list_canvas = Tkinter.Canvas(self.master)
-        self.server_list_canvas["bg"] = "grey"
-        # 子Frameをanvas Widget上に配置
-        self.server_list_frame = Tkinter.Frame(self.server_list_canvas )
-        self.server_list_frame["bg"] = "blue"
-        # ScrollbarをCanvas上に配置
-        self.bar = Tkinter.Scrollbar(self.server_list_canvas)
-        self.bar["bg"] = "red"
-        # キャンバスをスクロールさせるように設定
-        self.server_list_canvas["yscrollcommand"] = self.bar.set
-        self.bar["command"]=self.server_list_canvas.yview # ScrollbarでCanvasを制御
+        print( len(self.server_info['servers']))
+        server_list = Tkinter.Frame(self.master)
+        server_list.place(x=20,y=100,width=400,height=100)
 
-        # キャンバス、子フレーム、スクロールバーを表示
-        self.server_list_canvas.place(x=20,y=100 ,height=100, width=400)
-        self.server_list_frame.place(x=0,y=0 ,height=1000, width=350)
-        self.bar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+        canvas = Tkinter.Canvas(server_list)
+
+        # Top Widget上に Scrollbar を生成して配置
+        bar = Tkinter.Scrollbar(server_list, orient=Tkinter.VERTICAL)
+        bar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+        bar.config(command=canvas.yview) # ScrollbarでCanvasを制御
+
+        # Canvas Widget をTopWidget上に配置
+        canvas.config(yscrollcommand=bar.set) # Canvasのサイズ変更をScrollbarに通知
+        canvas.config(scrollregion=(0,0,400,20 * len(self.server_info['servers']))) #スクロール範囲
+        # canvas.pack(side=Tkinter.LEFT, fill=Tkinter.BOTH, expand=True)
+        canvas.place(x=0,y=0,width=400,height=100)
+
+        # Frame Widgetを 生成
+        frame = Tkinter.Frame(canvas)
+#         idx = 0
+#         for server_name, server_info in server_infos['servers'].items():
+#             add_connect_btn(frame, server_name, server_info, idx)
+#             idx = idx + 1
+        # Frame Widgetを Canvas Widget上に配置（）
+        canvas.create_window((0,0), window=frame, anchor=Tkinter.NW, width=400, height=20 * len(self.server_info['servers']))
+
+        frame2 = Tkinter.Frame(self.master)
 
         self.stop_app_btn = Tkinter.Button(self.master)
         self.stop_app_btn["text"] = "Exit"
@@ -103,7 +119,7 @@ class MainWindow:
 
         idx = 0
         for server_name, server_info in self.server_info['servers'].items():
-            self.add_connect_btn(server_name, server_info, idx)
+            self.add_connect_btn(frame, server_name, server_info, idx)
             idx = idx + 1
 
         print(self.server_info)
@@ -205,14 +221,14 @@ class MainWindow:
 #             thread.join()
             print("All thread is ended.")
 
-    def add_connect_btn(self, server_name, server_info, idx):
+    def add_connect_btn(self, frame, server_name, server_info, idx):
         print(('MainWindow.add_connect_btn START'))
         print(server_info)
         self.logger.log(['MainWindow', 'connect_to_server', 'server_name' + server_name])
         cl = WsClient(server_info)
         by = 20 * idx # + 100
         cl = self.cls[server_name]
-        connect_to_server_btn = Tkinter.Button(self.server_list_frame)
+        connect_to_server_btn = Tkinter.Button(frame)
         connect_to_server_btn["text"] = server_info['server_name']
         connect_to_server_btn["anchor"] = "w"
         connect_to_server_btn["command"] = cl.start_chat
