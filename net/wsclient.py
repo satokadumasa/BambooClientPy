@@ -3,6 +3,7 @@ Created on Aug 17, 2019
 
 @author: k_sato
 '''
+import pprint
 import socket
 import websocket
 from bs4 import BeautifulSoup
@@ -17,12 +18,8 @@ class WsClient:
     def __init__(self, server_info):
         self.logger = Logger()
         self.logger.log(['WsClient', 'init', 'START'])
-        print("WsClient.init")
         # 接続先情報受け取り
         self.server_info = server_info
-        print("-------------------")
-        print(self.server_info)
-        print("-------------------")
         # 通常ソケットの生成
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # セッション生成
@@ -33,6 +30,7 @@ class WsClient:
         self.logger.log(['WsClient', 'start_chat', 'START'])
         # Websocket用意
         ws_url = "ws://" + self.server_info['server_name'] + ":" + str(self.server_info['ws_port']) +  self.server_info['websocket_path']
+        self.logger.log(['WsClient', 'start_chat', 'ws_url' + ws_url])
         self.ws = websocket.WebSocketApp(ws_url,
                                     on_message=self.on_message,
                                     on_error=self.on_error,
@@ -40,6 +38,7 @@ class WsClient:
         # 通信ポーリング
         self.ws.on_open = self.on_open
         self.ws.run_forever()
+        self.logger.log(['WsClient', 'start_chat', 'End'])
 
     # メッセージ受信
     def on_message(self, message):
@@ -85,12 +84,8 @@ class WsClient:
     """
     def run(self):
         self.logger.log(['WsClient', 'run', 'START'])
-        print("WsClient.run")
         print(self.ws)
         for i in range(3):
-            # send the message, then wait
-            # so thread doesn't exit and socket
-            # isn't closed
             print("ws send...")
             self.ws.send("Hello %d" % i)
             print("Hello %d" % i)
@@ -99,7 +94,7 @@ class WsClient:
 
         time.sleep(1)
         self.ws.close()
-        print("Thread terminating...")
+        self.logger.log(['WsClient', 'run', 'Thread terminating...'])
 
     """
     認証処理
@@ -107,12 +102,12 @@ class WsClient:
     @return:  none
     """
     def auth_user(self):
-        print("Client.auth_user ")
+        self.logger.log(['WsClient', 'auth_user', 'START'])
         url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['sign_in_url']
-        print('sign_in_url > ' + url)
+        self.logger.log(['WsClient', 'auth_user', 'sign_in_url' + url])
         try:
             response = self.session.get(url)
-            print("status_code: " +str(response.status_code))
+            self.logger.log(['WsClient', 'run', 'status_code:' + str(response.status_code)])
             # BeautifulSoupオブジェクト作成(token取得の為)
             bs = BeautifulSoup(response.text, 'html.parser')
             login_data = {
@@ -129,12 +124,26 @@ class WsClient:
 
             # ログインAPI実行
             url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['api_sign_in_url']
-            print('api_sign_in_url > '   + url)
+            self.logger.log(['WsClient', 'auth_user', 'api_sign_in_url' + url])
 
             # 実行結果
-            login_data = self.session.post(url, data=login_data)
-            time.sleep(2)
+            self.login_data = self.session.post(url, data=login_data)
+            self.logger.log(['WsClient', 'auth_user', 'sign_in_url' + url])
+            self.logger.log(['WsClient', 'auth_user', "----WsClient.auth_user session----"])
+            self.logger.log(['WsClient', 'auth_user', "server_name:"+self.server_info['server_name'] ,'session:' + str(pprint.pprint(self.session))])
             self.status = 'able'
-            print(login_data.text)
         except requests.exceptions.RequestException:
-            self.status = 'able'
+            self.status = 'eable'
+    def get_lounges(self):
+        self.logger.log(['WsClient', 'get_lounges', "START"])
+        url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['lounges']
+        self.logger.log(['WsClient', 'get_lounges', "url"+url])
+        try:
+            response = self.session.get(url)
+            self.logger.log(['WsClient', 'get_lounges', 'sign_in_url' + url])
+            self.logger.log(['WsClient', 'get_lounges', "response.text"+response.text])
+            return response
+        except requests.exceptions.RequestException:
+            self.logger.log(['WsClient', 'get_lounges', 'Can not get lounges' ])
+
+
