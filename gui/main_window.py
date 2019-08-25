@@ -153,7 +153,7 @@ class MainWindow:
         # Server List 表示 を生成
         print( len(self.server_info['servers']))
         list_frame = Tkinter.Frame(self.master)
-        list_frame.place(x=20,y=200,width=400,height=200)
+        list_frame.place(x=20,y=500,width=400,height=200)
 
         canvas = Tkinter.Canvas(list_frame)
 
@@ -173,7 +173,9 @@ class MainWindow:
         canvas.create_window((0,0), window=self.lounges_list_frame, anchor=Tkinter.NW, width=400, height=20 * len(self.server_info['servers']))
 
         idx = 0
-        for chat_room_info in self.lounges_list['servers']:
+        print(self.lounges_list)
+        for chat_room_info in self.lounges_list:
+            print(chat_room_info)
             self.add_connect_chat_room_btn(chat_room_info, idx)
             idx = idx + 1
 
@@ -254,7 +256,7 @@ class MainWindow:
         print("overview:" + str(chat_room_info['overview']))
         print("overview:" + str(chat_room_info['overview']))
         by = 20 * idx
-        connect_to_server_btn = Tkinter.Button(self.server_list_frame)
+        connect_to_server_btn = Tkinter.Button(self.lounges_list_frame)
         connect_to_server_btn["text"] = chat_room_info['title']
         connect_to_server_btn["anchor"] = "w"
 #         connect_to_server_btn.config(command= lambda: self.get_lounges(server_name))
@@ -272,6 +274,8 @@ class MainWindow:
 #             print("overview:" + str(chat_room_info['overview']))
 #             print("overview:" + str(chat_room_info['overview']))
         self.user = cl.login_data.text
+        self.add_lounges_list()
+
     """
     時計開始
     @param none
