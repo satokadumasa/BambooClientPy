@@ -117,10 +117,10 @@ class WsClient:
             }
 
             # tokenの取得
-            authenticity_token = bs.find(attrs={'name':'authenticity_token'}).get('value')
+            self.authenticity_token = bs.find(attrs={'name':'authenticity_token'}).get('value')
 
             # 取得したtokenをpostするパラメータに追加
-            login_data['authenticity_token'] = authenticity_token
+            login_data['authenticity_token'] = self.authenticity_token
 
             # ログインAPI実行
             url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['api_sign_in_url']
@@ -145,5 +145,21 @@ class WsClient:
             return response
         except requests.exceptions.RequestException:
             self.logger.log(['WsClient', 'get_lounges', 'Can not get lounges' ])
+
+    def remark(self, content, lounge_id):
+        self.logger.log(['WsClient', 'remark', 'Start' ])
+        subscribre_data = {
+           'UTF-8': '✓',
+           'user_id': self.login_data['user_id'],
+           'lounge_id': lounge_id,
+           'content': content,
+           'last_posted_at': self.login_data['last_posted_at'],
+           'authenticity_token': self.authenticity_token
+        }
+        ws_url = "ws://" + self.server_info['server_name'] + ":" + str(self.server_info['ws_port']) +  self.server_info['websocket_path']
+        self.data = self.session.post(ws_url, data=subscribre_data)
+        self.logger.log(['WsClient', 'remark', 'data geted' ])
+        self.logger.log(['WsClient', 'remark', 'data' + self.data ])
+
 
 
