@@ -136,7 +136,7 @@ class WsClient:
             self.status = 'eable'
     def get_lounges(self):
         self.logger.log(['WsClient', 'get_lounges', "START"])
-        url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['lounges']
+        url = self.server_info['protcol'] + '://' + self.server_info['server_name'] + self.server_info['lounges'] + ".json"
         self.logger.log(['WsClient', 'get_lounges', "url"+url])
         try:
             response = self.session.get(url)

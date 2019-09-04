@@ -28,9 +28,6 @@ class ClientWindow:
     def __init__(self, ws_client):
         self.logger = Logger()
         self.logger.log(['ClientWindow', 'nit', 'START'])
-        print("----------------")
-        print(ws_client.server_info["server_name"])
-        print("----------------")
         self.ws_client = ws_client
 
         self.master = Tkinter.Tk()
@@ -49,10 +46,8 @@ class ClientWindow:
         self.add_lounges_list()
 
     def get_lounges(self):
-        print("ClientWindow.get_lounges")
         lounges = self.ws_client.get_lounges()
-        print("ClientWindow.get_lounges lounges.text")
-        print(lounges.text)
+        self.logger.log(['ClientWindow', 'get_lounges', 'lounges.text'])
         self.lounges_list = json.loads( lounges.text)
         self.user = self.ws_client.login_data.text
 
